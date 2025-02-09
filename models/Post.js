@@ -10,7 +10,7 @@ const postSchema = new mongoose.Schema({
   content: { type: String, required: true },
   like: { type: Number, default: 0 },
   link: { type: String, required: true },
-}, { timestamps: true });
+});
 
 const Post = mongoose.model("Post", postSchema);
 module.exports = { Post };

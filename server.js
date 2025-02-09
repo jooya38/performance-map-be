@@ -7,7 +7,12 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth.routes.js');
 
 app.use(express.json());
-app.use(cors());
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
+
 const PORT = process.env.PORT;
 const DB_URL = process.env.DB_URL;
 
@@ -17,7 +22,7 @@ mongoose
   .catch((err) => console.error("MongoDB 연결 실패:", err));
 
 
-app.post("/api/posts", async (req, res) => {
+app.post("/api/", async (req, res) => {
   try {
     const newPost = new Post(req.body);
     const savedPost = await newPost.save();
@@ -38,7 +43,7 @@ app.post("/api/posts", async (req, res) => {
   }
 });
 
-app.get("/api/posts", async (req, res) => {
+app.get("/api/", async (req, res) => {
   try {
     const posts = await Post.find();
 
@@ -56,6 +61,36 @@ app.get("/api/posts", async (req, res) => {
     });
   }
 });
+
+
+app.get("/api/post/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findById(id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        status_code: 404,
+        message: "Post not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      status_code: 200,
+      data: post,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      status_code: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+});
+
 
 // app.set('db', db);
 app.use("/api", authRoutes);
