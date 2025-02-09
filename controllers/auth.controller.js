@@ -16,16 +16,6 @@ const signup = async (req, res) => {
             return;
         }
 
-        const exist_user = await db.collection('user').findOne({id});
-        if (exist_user) {
-            res.status(409).send({
-                "code" : 409,  
-                "success" : false,
-                "message" : "User already exists."
-            });
-            return;
-        }
-
         const hashpw = await bcrypt.hash(password, 10);
 
         await db.collection('user').insertOne({
