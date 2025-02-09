@@ -1,0 +1,15 @@
+# ❌ node_modules 폴더 제외
+node_modules/
+
+# ❌ 환경 변수 파일 제외
+.env
+config/key.js
+
+# ❌ 로그 파일 제외
+logs/
+*.log
+
+# ❌ OS & Editor 파일 제외
+.DS_Store
+.vscode/
+.idea/
