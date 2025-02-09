@@ -1,14 +1,15 @@
 //로그인,회원가입 관련 컨트롤러
 const bcrypt = require('bcrypt');
+const { User } = require('../models/User');
 const tokenService = require('../middlewares/auth.js');
 
 const signup = async (req, res) => {
     try{
+        console.log(req.body);
         const { id, password } = req.body;
-        const db = req.app.get('db');
 
         if (!id || !password) {
-            res.status(400).send({ 
+            res.status(400).json({ 
                 "code" : 400,
                 "success" : false,
                 "message" : "Invalid ID or password."
@@ -16,19 +17,26 @@ const signup = async (req, res) => {
             return;
         }
 
+        const exist_user = await User.findOne({ id });
+        if (exist_user) {
+        return res.status(409).json({
+            "code": 409,
+            "success": false,
+            "message": "User already exists.",
+        });
+        }
+
         const hashpw = await bcrypt.hash(password, 10);
 
-        await db.collection('user').insertOne({
-            id : id,
-            password : hashpw,
-        })
-        res.send({
+        const newUser = new User({ id, password: hashpw, email: ""  });
+        
+        await newUser.save();
+        res.status(200).json({
             "code": 200,
             "success": true,
-            "token": `Bearer ${tokenService.getToken(id)}`,
-            "id": id
+            "token": `Bearer ${tokenService.getToken(newUser.id)}`,
+            "id": newUser.id,
         });
-
     } catch (err) {
         console.error(err);
         res.status(500).send({ 
@@ -42,9 +50,8 @@ const signup = async (req, res) => {
 const signin = async (req, res) => {
     try{
         const { id, password } = req.body;
-        const db = req.app.get('db');
 
-        const user = await db.collection('user').findOne({id});
+        const user = await User.findOne({ id });
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).send({ 
                 "code": 400,
@@ -53,11 +60,11 @@ const signin = async (req, res) => {
             });
         }
 
-        res.send({ 
+        res.status(200).send({ 
             "code": 200,
             "success": true,
-            "token": `Bearer ${tokenService.getToken(id)}`,
-            "id": id
+            "token": `Bearer ${tokenService.getToken(user.id)}`,
+            "id": user.id,
         });
     } catch (err) {
         console.error(err);
@@ -72,7 +79,6 @@ const signin = async (req, res) => {
 const idcheck = async(req, res) => {
     try{
         const { id } = req.body;
-        const db = req.app.get('db');
 
         if (!id) {
             res.status(400).send({ 
@@ -83,7 +89,7 @@ const idcheck = async(req, res) => {
             return;
         }
 
-        const exist_user = await db.collection('user').findOne({id});
+        const exist_user = await User.findOne({id});
         if (exist_user) {
             res.status(409).send({ 
                 "code": 409,
@@ -92,7 +98,7 @@ const idcheck = async(req, res) => {
             });
             return;
         }
-        res.send({
+        res.status(200).send({
             "code": 200,
             "id-check": true,
             "message": "Availabel ID."

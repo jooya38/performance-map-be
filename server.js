@@ -8,9 +8,8 @@ const authRoutes = require('./routes/auth.routes.js');
 
 app.use(express.json());
 app.use(cors());
-const PORT = process.env.PORT || 3000;
-
-const DB_URL = process.env.DB_URL || "mongodb+srv://ddugel3:0000d@forum.2fril.mongodb.net/?retryWrites=true&w=majority&appName=forum";
+const PORT = process.env.PORT;
+const DB_URL = process.env.DB_URL;
 
 mongoose
   .connect(DB_URL)
@@ -58,7 +57,7 @@ app.get("/api/posts", async (req, res) => {
   }
 });
 
-app.set('db', db);
+// app.set('db', db);
 app.use("/api", authRoutes);
 
 app.listen(PORT, () => {

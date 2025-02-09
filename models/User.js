@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 
 // 유저 스키마 정의
 const userSchema = new mongoose.Schema({
-  name: {
+  id: {
     type: String,
     required: true,
     maxlength: 50,
   },
   email: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
   },
   password: {
